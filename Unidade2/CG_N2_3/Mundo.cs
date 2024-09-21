@@ -25,6 +25,7 @@ namespace gcgcg
     private char rotuloAtual = '?';
     private Dictionary<char, Objeto> grafoLista = [];
     private Objeto objetoSelecionado = null;
+    private double raio = 5;
 
     private readonly float[] _sruEixos =
     [
@@ -62,54 +63,24 @@ namespace gcgcg
       var itGrafo = grafoLista.GetEnumerator();
       itGrafo.MoveNext();
       itGrafo.MoveNext();
-      // if (objetoSelecionado == null)
-      // {
-      //   objetoSelecionado = itGrafo.Current.Value;
-      //   return false;
-      // }
-      // if (objetoSelecionado.Rotulo == '@')
-      // {
-      //   objetoSelecionado = itGrafo.Current.Value;
-      //   return true;
-      // }
+      if (objetoSelecionado == null)
+      {
+        objetoSelecionado = itGrafo.Current.Value;
+        return false;
+      }
+      if (objetoSelecionado.Rotulo == '@')
+      {
+        objetoSelecionado = itGrafo.Current.Value;
+        return true;
+      }
       do
       {
-        // if (objetoSelecionado != null) {
-        //   grafoLista.Remove(objetoSelecionado.Rotulo);
-        // }
-        if (objetoSelecionado != null) {
-          grafoLista.Remove(itGrafo.Current.Key);
-          grafoLista = mundo.GrafocenaAtualizar(grafoLista);
-          
-        }
-
-        if (itGrafo.Current.Key == '\0') {
-          grafoLista.Remove(itGrafo.Current.Key);
-        }
-        switch (itGrafo.Current.Key)
+        if (itGrafo.Current.Key == objetoSelecionado.Rotulo)
         {
-          case '\0':
-            objetoSelecionado = new SegReta(mundo, ref rotuloAtual, new Ponto4D(0.5, 0.5), new Ponto4D(-0.25, 0.25));
-            break;
-          case 'A': // LineLoop - Polígono
-            objetoSelecionado = new SegReta(mundo, ref rotuloAtual, new Ponto4D(0.25, 0.25), new Ponto4D(-0.25, -0.25));
-            return true;
-            break;
-          case 'B': // Points - Ponto
-            break;
-          case 'C': // LineLoop - Retângulo
-            break;
-          case 'D': // Lines - SegReta
-            break;
-          case 'E': // Points  - Pontos
-            break;
+          itGrafo.MoveNext();
+          objetoSelecionado = itGrafo.Current.Value;
+          return true;
         }
-        // if (itGrafo.Current.Key == objetoSelecionado.Rotulo)
-        // {
-        //   itGrafo.MoveNext();
-        //   objetoSelecionado = itGrafo.Current.Value;
-        //   return true;
-        // }
       } while (itGrafo.MoveNext());
       return false;
     }
@@ -124,7 +95,7 @@ namespace gcgcg
 #endif
 
       // GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-      GL.ClearColor(0.502f, 0.502f, 0.502f, 1.0f);
+      GL.ClearColor(0.502f, 0.502f, 0.698f, 1.0f);
 
       #region Cores
       _shaderVermelha = new Shader("Shaders/shader.vert", "Shaders/shaderVermelha.frag");
@@ -158,38 +129,28 @@ namespace gcgcg
       // objetoSelecionado = new Ponto(objetoSelecionado, ref rotuloAtual, new Ponto4D(0.50, 0.75));
       #endregion
       #region Objeto: retângulo  
-      // objetoSelecionado = new Retangulo(mundo, ref rotuloAtual, new Ponto4D(0.5, 0.5), new Ponto4D(-0.75, 0.75))
+      // objetoSelecionado = new Retangulo(mundo, ref rotuloAtual, new Ponto4D(-0.25, 0.25), new Ponto4D(-0.75, 0.75))
       // {
       //   PrimitivaTipo = PrimitiveType.LineLoop
       // };
       #endregion
       #region Objeto: segmento de reta  
-      // objetoSelecionado = new SegReta(mundo, ref rotuloAtual, new Ponto4D(0.5, 0.5), new Ponto4D(-0.5, 0.5));
+      // objetoSelecionado = new SegReta(mundo, ref rotuloAtual, new Ponto4D(-0.25, -0.25), new Ponto4D(-0.75, -0.75));
       #endregion
       #region Objeto: ponto  
-      // objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(0.50, -0.50))
+      // objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(0.25, -0.25))
       // {
       //   PrimitivaTipo = PrimitiveType.Points,
       //   PrimitivaTamanho = 10
       // };
+      #endregion
 
-      // objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(-0.50, 0.50))
-      // {
-      //   PrimitivaTipo = PrimitiveType.Points,
-      //   PrimitivaTamanho = 10
-      // };
-
-      // objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(-0.50, -0.50))
-      // {
-      //   PrimitivaTipo = PrimitiveType.Points,
-      //   PrimitivaTamanho = 10
-      // };
-
-      // objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(0.50, 0.50))
-      // {
-      //   PrimitivaTipo = PrimitiveType.Points,
-      //   PrimitivaTamanho = 10
-      // };
+      #region Objeto: circulo  
+      objetoSelecionado = new Circulo(mundo, ref rotuloAtual, ref raio, new Ponto4D(0.5, 0.5))
+      {
+        PrimitivaTipo = PrimitiveType.Points,
+        PrimitivaTamanho = 5
+      };
       #endregion
 
 #if CG_Privado
