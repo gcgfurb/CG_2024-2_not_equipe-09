@@ -95,7 +95,7 @@ namespace gcgcg
 #endif
 
       // GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-      GL.ClearColor(0.502f, 0.502f, 0.698f, 1.0f);
+      GL.ClearColor(0.502f, 0.502f, 0.502f, 1.0f);
 
       #region Cores
       _shaderVermelha = new Shader("Shaders/shader.vert", "Shaders/shaderVermelha.frag");
@@ -146,11 +146,15 @@ namespace gcgcg
       #endregion
 
       #region Objeto: circulo  
-      objetoSelecionado = new Circulo(mundo, ref rotuloAtual, ref raio, new Ponto4D(0.5, 0.5))
-      {
-        PrimitivaTipo = PrimitiveType.Points,
-        PrimitivaTamanho = 5
-      };
+      // objetoSelecionado = new Circulo(mundo, ref rotuloAtual, ref raio, new Ponto4D(0.5, 0.5))
+      // {
+      //   PrimitivaTipo = PrimitiveType.Points,
+      //   PrimitivaTamanho = 5
+      // };
+      #endregion
+
+      #region Objeto: SrPalito  
+      objetoSelecionado = new SrPalito(mundo, ref rotuloAtual);
       #endregion
 
 #if CG_Privado
@@ -232,6 +236,39 @@ namespace gcgcg
         //FIXME: Spline limpa os pontos da Spline, mas não limpa pontos e poliedro de controle 
         objetoSelecionado.PontosApagar();
       }
+
+      if (estadoTeclado.IsKeyDown(Keys.Q))
+      {
+        ((SrPalito)objetoSelecionado).MoverEsquerda();
+      }
+
+      if (estadoTeclado.IsKeyDown(Keys.W))
+      {
+        ((SrPalito)objetoSelecionado).MoverDireita();
+      }
+
+      // Ajuste de tamanho (raio)
+      if (estadoTeclado.IsKeyDown(Keys.A))
+      {
+        ((SrPalito)objetoSelecionado).DiminuirRaio();
+      }
+      
+      if (estadoTeclado.IsKeyDown(Keys.S))
+      {
+        ((SrPalito)objetoSelecionado).AumentarRaio();
+      }
+
+      // Rotação (ângulo)
+      if (estadoTeclado.IsKeyDown(Keys.Z))
+      {
+          ((SrPalito)objetoSelecionado).DiminuirAngulo();
+      }
+      
+      if (estadoTeclado.IsKeyDown(Keys.X))
+      {
+          ((SrPalito)objetoSelecionado).AumentarAngulo();
+      }
+
       #endregion
 
       #region  Mouse
