@@ -25,6 +25,8 @@ namespace gcgcg
     private char rotuloAtual = '?';
     private Dictionary<char, Objeto> grafoLista = [];
     private Objeto objetoSelecionado = null;
+    private List<Objeto> objetos = new List<Objeto>();
+    private int etapa = 0;
 
     private readonly float[] _sruEixos =
     [
@@ -58,60 +60,125 @@ namespace gcgcg
 
     private bool GrafoCenaProximo()
     {
-      GrafocenaAtualizar();
-      var itGrafo = grafoLista.GetEnumerator();
-      itGrafo.MoveNext();
-      itGrafo.MoveNext();
-      // if (objetoSelecionado == null)
-      // {
-      //   objetoSelecionado = itGrafo.Current.Value;
-      //   return false;
-      // }
-      // if (objetoSelecionado.Rotulo == '@')
-      // {
-      //   objetoSelecionado = itGrafo.Current.Value;
-      //   return true;
-      // }
-      do
+      objetos.Clear();
+      objetoSelecionado = null;
+      
+      switch (etapa)
       {
-        // if (objetoSelecionado != null) {
-        //   grafoLista.Remove(objetoSelecionado.Rotulo);
-        // }
-        if (objetoSelecionado != null) {
-          grafoLista.Remove(itGrafo.Current.Key);
-          grafoLista = mundo.GrafocenaAtualizar(grafoLista);
-          
-        }
+        case 1:
+          // Desenha segmentos ligando os pontos de cima e de baixo do retângulo
+          SegReta segReta = new SegReta(mundo, ref rotuloAtual, new Ponto4D(-0.5, 0.5), new Ponto4D(0.5, 0.5))
+          {
+            PrimitivaTipo = PrimitiveType.Lines,
+            ShaderObjeto = new Shader("Shaders/shader.vert", "Shaders/shaderMagenta.frag")
+          };
+          objetos.Add(segReta);
 
-        if (itGrafo.Current.Key == '\0') {
-          grafoLista.Remove(itGrafo.Current.Key);
-        }
-        switch (itGrafo.Current.Key)
-        {
-          case '\0':
-            objetoSelecionado = new SegReta(mundo, ref rotuloAtual, new Ponto4D(0.5, 0.5), new Ponto4D(-0.25, 0.25));
-            break;
-          case 'A': // LineLoop - Polígono
-            objetoSelecionado = new SegReta(mundo, ref rotuloAtual, new Ponto4D(0.25, 0.25), new Ponto4D(-0.25, -0.25));
-            return true;
-            break;
-          case 'B': // Points - Ponto
-            break;
-          case 'C': // LineLoop - Retângulo
-            break;
-          case 'D': // Lines - SegReta
-            break;
-          case 'E': // Points  - Pontos
-            break;
-        }
-        // if (itGrafo.Current.Key == objetoSelecionado.Rotulo)
-        // {
-        //   itGrafo.MoveNext();
-        //   objetoSelecionado = itGrafo.Current.Value;
-        //   return true;
-        // }
-      } while (itGrafo.MoveNext());
-      return false;
+          segReta = new SegReta(mundo, ref rotuloAtual, new Ponto4D(-0.5, -0.5), new Ponto4D(0.5, -0.5))
+          {
+            PrimitivaTipo = PrimitiveType.Lines,
+            ShaderObjeto = new Shader("Shaders/shader.vert", "Shaders/shaderMagenta.frag")
+          };
+          objetos.Add(segReta);
+          etapa++;
+          break;
+        case 2:
+          // Forma o retângulo completo
+          Retangulo retangulo = new Retangulo(mundo, ref rotuloAtual, new Ponto4D(-0.5, -0.5), new Ponto4D(0.5, 0.5))
+          {
+            PrimitivaTipo = PrimitiveType.LineLoop,
+            ShaderObjeto = new Shader("Shaders/shader.vert", "Shaders/shaderMagenta.frag")
+          };
+          
+          objetos.Add(retangulo);
+          etapa++;
+          break;
+        case 3:
+          // Remove o lado esquerdo do retângulo
+          List<Ponto4D> pontosPoligono =
+          [
+            new Ponto4D(-0.5, 0.5),
+            new Ponto4D(0.5, 0.5),
+            new Ponto4D(0.5, -0.5),
+            new Ponto4D(-0.5, -0.5)
+          ];
+          Poligono poligono = new Poligono(mundo, ref rotuloAtual, pontosPoligono)
+          {
+            PrimitivaTipo = PrimitiveType.LineStrip,
+            ShaderObjeto = new Shader("Shaders/shader.vert", "Shaders/shaderMagenta.frag")
+          };
+          
+          objetos.Add(poligono);
+          etapa++;
+          break;
+        case 4:
+          // Forma um triângulo e o pinta de rosa
+          pontosPoligono =
+          [
+            new Ponto4D(0.5, 0.5),
+            new Ponto4D(0.5, -0.5),
+            new Ponto4D(-0.5, -0.5)
+          ];
+          poligono = new Poligono(mundo, ref rotuloAtual, pontosPoligono)
+          {
+            PrimitivaTipo = PrimitiveType.TriangleStrip,
+            ShaderObjeto = new Shader("Shaders/shader.vert", "Shaders/shaderMagenta.frag")
+          };
+          
+          objetos.Add(poligono);
+          etapa++;
+          break;
+        case 5:
+          // Remove o lado esquerdo do retângulo
+          pontosPoligono =
+          [
+            new Ponto4D(-0.5, 0.5),
+            new Ponto4D(0.5, 0.5),
+            new Ponto4D(0.5, -0.5),
+            new Ponto4D(-0.5, -0.5)
+          ];
+          poligono = new Poligono(mundo, ref rotuloAtual, pontosPoligono)
+          {
+            PrimitivaTipo = PrimitiveType.TriangleStrip,
+            ShaderObjeto = new Shader("Shaders/shader.vert", "Shaders/shaderMagenta.frag")
+          };
+          
+          objetos.Add(poligono);
+          etapa++;
+          break;
+        case 6:
+          // Retângulo completo
+          pontosPoligono =
+          [
+            new Ponto4D(-0.5, 0.5),
+            new Ponto4D(0.5, 0.5),
+            new Ponto4D(0.5, -0.5),
+            new Ponto4D(-0.5, -0.5),
+            new Ponto4D(0, 0),
+            new Ponto4D(-0.5, 0.5),
+          ];
+          poligono = new Poligono(mundo, ref rotuloAtual, pontosPoligono)
+          {
+            PrimitivaTipo = PrimitiveType.TriangleFan,
+            ShaderObjeto = new Shader("Shaders/shader.vert", "Shaders/shaderMagenta.frag")
+          };
+          
+          objetos.Add(poligono);
+          etapa++;
+          break;
+        case 7:
+          Retangulo pontosIniciais = new Retangulo(mundo, ref rotuloAtual, new Ponto4D(-0.5, -0.5), new Ponto4D(0.5, 0.5))
+          {
+            PrimitivaTipo = PrimitiveType.Points,
+            ShaderObjeto = new Shader("Shaders/shader.vert", "Shaders/shaderMagenta.frag")
+          };
+
+          objetos.Add(pontosIniciais);
+          etapa = 1;
+          break;
+      }
+
+      return true;
     }
 
     protected override void OnLoad()
@@ -167,30 +234,20 @@ namespace gcgcg
       // objetoSelecionado = new SegReta(mundo, ref rotuloAtual, new Ponto4D(0.5, 0.5), new Ponto4D(-0.5, 0.5));
       #endregion
       #region Objeto: ponto  
-      // objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(0.50, -0.50))
+      // Ponto ponto = new Ponto(mundo, ref rotuloAtual, new Ponto4D(0.50, -0.50))
       // {
       //   PrimitivaTipo = PrimitiveType.Points,
-      //   PrimitivaTamanho = 10
-      // };
-
-      // objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(-0.50, 0.50))
-      // {
-      //   PrimitivaTipo = PrimitiveType.Points,
-      //   PrimitivaTamanho = 10
-      // };
-
-      // objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(-0.50, -0.50))
-      // {
-      //   PrimitivaTipo = PrimitiveType.Points,
-      //   PrimitivaTamanho = 10
-      // };
-
-      // objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(0.50, 0.50))
-      // {
-      //   PrimitivaTipo = PrimitiveType.Points,
-      //   PrimitivaTamanho = 10
+      //   PrimitivaTamanho = 10,
       // };
       #endregion
+
+      Retangulo pontosIniciais = new Retangulo(mundo, ref rotuloAtual, new Ponto4D(-0.5, -0.5), new Ponto4D(0.5, 0.5))
+      {
+        PrimitivaTipo = PrimitiveType.Points,
+        ShaderObjeto = new Shader("Shaders/shader.vert", "Shaders/shaderMagenta.frag")
+      };
+      objetos.Add(pontosIniciais);
+      etapa++;
 
 #if CG_Privado
       #region Objeto: circulo - origem
@@ -227,7 +284,9 @@ namespace gcgcg
 
       GL.Clear(ClearBufferMask.ColorBufferBit);
 
-      mundo.Desenhar(new Transformacao4D(), objetoSelecionado);
+      foreach (var obj in objetos) {
+        obj.Desenhar(new Transformacao4D(), objetoSelecionado);
+      }
 
 #if CG_Gizmo
       Gizmo_Sru3D();
@@ -244,8 +303,9 @@ namespace gcgcg
       if (estadoTeclado.IsKeyDown(Keys.Escape))
         Close();
 
-      if (estadoTeclado.IsKeyPressed(Keys.Space))
+      if (estadoTeclado.IsKeyPressed(Keys.Space)) {
         GrafoCenaProximo();
+      }
         
       if (estadoTeclado.IsKeyPressed(Keys.P) && objetoSelecionado != null)
       {
