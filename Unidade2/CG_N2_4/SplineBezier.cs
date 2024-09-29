@@ -7,41 +7,50 @@ namespace gcgcg
 {
   internal class SplineBezier : Objeto
   {
-    private int qtdPontos;
-    private List<Ponto4D> pontosControle;
-
-    public SplineBezier(Objeto _paiRef, ref char _rotulo, List<Ponto4D> pontosControle) : base(_paiRef, ref _rotulo)
+    public SplineBezier(Objeto _paiRef, ref char _rotulo) : base(_paiRef, ref _rotulo)
     {
-      this.pontosControle = pontosControle;
-      qtdPontos = 11; // Quantidade inicial de pontos na spline
+      PontosListaTamanho = 11; // Quantidade inicial de pontos na spline
       PrimitivaTipo = PrimitiveType.LineStrip; // Desenho da spline
+      Atualizar();
+    }
+
+    public void SplineQtdPto(int inc)
+    {
+      PontosListaTamanho += inc;
+      if (PontosListaTamanho < 2) PontosListaTamanho = 2; // Evitar quantidade negativa ou zero
       Atualizar();
     }
 
     public void Atualizar()
     {
       pontosLista.Clear();
-      for (int i = 0; i < qtdPontos; i++)
+      for (int i = 0; i < PontosListaTamanho; i++)
       {
         // Algoritmo para calcular a spline
-        double t = i / (double)(qtdPontos - 1);
+        double t = i / (double)(PontosListaTamanho - 1);
         Ponto4D pontoSpline = CalcularSpline(t);
         PontosAdicionar(pontoSpline);
       }
       base.ObjetoAtualizar();
     }
 
+    public void AtualizarSpline(Ponto4D ptoInc, bool proximo)
+    {
+      pontosLista[proximo] = ptoInc;
+      Atualizar();
+    }
+
     private Ponto4D CalcularSpline(double t)
     {
-      int n = pontosControle.Count - 1; // Grau da curva
+      int n = pontosLista.Count - 1; // Grau da curva
       Ponto4D pontoBezier = new Ponto4D(0, 0, 0);
 
       for (int i = 0; i <= n; i++)
       {
           double coefBinomial = Binomial(n, i);
           double bernstein = coefBinomial * Math.Pow(1 - t, n - i) * Math.Pow(t, i);
-          pontoBezier.X += bernstein * pontosControle[i].X;
-          pontoBezier.Y += bernstein * pontosControle[i].Y * -1;
+          pontoBezier.X += bernstein * pontosLista[i].X;
+          pontoBezier.Y += bernstein * pontosLista[i].Y * -1;
       }
 
       return pontoBezier;
@@ -59,19 +68,6 @@ namespace gcgcg
       if (num == 0 || num == 1)
         return 1;
       return num * Fatorial(num - 1);
-    }
-
-    public void AlterarQuantidadePontos(int incremento)
-    {
-      qtdPontos += incremento;
-      if (qtdPontos < 2) qtdPontos = 2; // Evitar quantidade negativa ou zero
-      Atualizar();
-    }
-
-    public void AtualizarPontoControle(int indice, Ponto4D novoPonto)
-    {
-      pontosControle[indice] = novoPonto;
-      Atualizar(); // Recalcular a spline quando um ponto de controle mudar
-    }
+    } 
   }
 }

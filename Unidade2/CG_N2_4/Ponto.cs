@@ -1,5 +1,3 @@
-#define CG_Debug
-
 using CG_Biblioteca;
 using OpenTK.Graphics.OpenGL4;
 
@@ -22,7 +20,7 @@ namespace gcgcg
       Atualizar();
     }
 
-    private void Atualizar()
+    public void Atualizar()
     {
 
       base.ObjetoAtualizar();
