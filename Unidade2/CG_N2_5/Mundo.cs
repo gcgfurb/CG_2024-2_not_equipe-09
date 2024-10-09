@@ -25,8 +25,9 @@ namespace gcgcg
     private char rotuloAtual = '?';
     private Dictionary<char, Objeto> grafoLista = [];
     private Objeto objetoSelecionado = null;
-    private double raio = 5;
-
+    private double raio = 1;
+    private Circulo circuloMaior;
+    private Circulo circuloMenor;
     private readonly float[] _sruEixos =
     [
        0.0f,  0.0f,  0.0f, /* X- */      0.5f,  0.0f,  0.0f, /* X+ */
@@ -145,12 +146,32 @@ namespace gcgcg
       // };
       #endregion
 
-      #region Objeto: circulo  
-      objetoSelecionado = new Circulo(mundo, ref rotuloAtual, ref raio, new Ponto4D(0.5, 0.5))
-      {
-        PrimitivaTipo = PrimitiveType.Points,
-        PrimitivaTamanho = 5
+      #region Objeto: Bbox
+      raio = 0.25;
+      Ponto4D ptoDeslocamento = new Ponto4D(0.25, 0.25);
+      Ponto pontoCentral = new Ponto(mundo, ref rotuloAtual, ptoDeslocamento) {
+        PrimitivaTamanho = 10
       };
+      circuloMaior = new Circulo(mundo, ref rotuloAtual, ref raio, ptoDeslocamento, 0.3)
+      {
+        PrimitivaTipo = PrimitiveType.Points
+      };
+
+      Ponto4D ponto1 = Matematica.GerarPtosCirculo(45, raio);
+      Ponto4D pontoFinal1 = new Ponto4D(ponto1.X + ptoDeslocamento.X, ponto1.Y + ptoDeslocamento.Y, 0);
+      Ponto4D ponto2 = Matematica.GerarPtosCirculo(225, raio);
+      Ponto4D pontoFinal2 = new Ponto4D(ponto2.X + ptoDeslocamento.X, ponto2.Y + ptoDeslocamento.Y, 0);
+
+      objetoSelecionado = new Retangulo(mundo, ref rotuloAtual, pontoFinal1, pontoFinal2){
+        PrimitivaTipo = PrimitiveType.LineLoop
+      };
+
+      raio = 0.1;
+      circuloMenor = new Circulo(mundo, ref rotuloAtual, ref raio, new Ponto4D(0.25, 0.25), 1)
+      {
+        PrimitivaTipo = PrimitiveType.Points
+      };
+      objetoSelecionado = circuloMenor;
       #endregion
 
 #if CG_Privado
@@ -206,7 +227,7 @@ namespace gcgcg
         Close();
 
       if (estadoTeclado.IsKeyPressed(Keys.Space))
-        GrafoCenaProximo();
+        // GrafoCenaProximo();
         
       if (estadoTeclado.IsKeyPressed(Keys.P) && objetoSelecionado != null)
       {
@@ -214,8 +235,23 @@ namespace gcgcg
       }
 
       if (estadoTeclado.IsKeyPressed(Keys.C) && objetoSelecionado != null)
+      {        
+        circuloMenor.MoverCirculoMenor(circuloMaior, 'C');
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.B) && objetoSelecionado != null)
       {
-        objetoSelecionado.ShaderObjeto = _shaderCiano;
+        circuloMenor.MoverCirculoMenor(circuloMaior, 'B');
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.E) && objetoSelecionado != null)
+      {
+        circuloMenor.MoverCirculoMenor(circuloMaior, 'E');
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.D) && objetoSelecionado != null)
+      {
+        circuloMenor.MoverCirculoMenor(circuloMaior, 'D');
       }
 
       if (estadoTeclado.IsKeyPressed(Keys.Right) && objetoSelecionado != null)
