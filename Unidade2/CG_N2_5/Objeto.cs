@@ -122,7 +122,7 @@ namespace gcgcg
         {
           matrizGlobal = ObjetoMatrizGlobal(matriz);
           bBox.Atualizar(matrizGlobal, pontosLista);
-          // bBox.Desenhar();
+          bBox.Desenhar();
         }
 #endif
       }

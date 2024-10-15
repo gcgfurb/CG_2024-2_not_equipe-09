@@ -8,6 +8,9 @@ namespace gcgcg
     {
         private double raio;
         private Ponto4D centro;
+        private double novoCentroMenorY;
+        private double novoCentroMenorX;
+        private bool foraRetangulo = false;
         public Circulo(Objeto _paiRef, ref char _rotulo, ref double _raio, Ponto4D ptoDeslocamento, double angulo) : base(_paiRef, ref _rotulo)
         {
             raio = _raio;
@@ -47,12 +50,18 @@ namespace gcgcg
 
         public void MoverCirculoMenor(Circulo circuloMaior, char direcao)
         {
-            Ponto4D centroMenor = this.GetCentro();
-            Ponto4D centroMaior = circuloMaior.GetCentro();
             double raioMaior = circuloMaior.GetRaio();
+            Ponto4D centroMenor = this.GetCentro();
+            novoCentroMenorX = centroMenor.X;
+            novoCentroMenorY = centroMenor.Y;
+
+            Ponto4D pontoRetangulo1 = Matematica.GerarPtosCirculo(45, raioMaior);
+            Ponto4D pontoFinalRetangulo1 = new Ponto4D(pontoRetangulo1.X + raioMaior, pontoRetangulo1.Y + raioMaior, 0);
+            Ponto4D pontoRetangulo2 = Matematica.GerarPtosCirculo(225, raioMaior);
+            Ponto4D pontoFinalRetangulo2 = new Ponto4D(pontoRetangulo2.X + raioMaior, pontoRetangulo2.Y + raioMaior, 0);
+
+            Ponto4D centroMaior = circuloMaior.GetCentro();
             Ponto4D pontoCentroMenor = new Ponto4D(centroMenor.X, centroMenor.Y);
-            double novoCentroMenorY = centroMenor.Y;
-            double novoCentroMenorX = centroMenor.X;
 
             double delta = 0.01; // Valor de deslocamento
 
@@ -69,38 +78,55 @@ namespace gcgcg
                     break;
                 case 'E':  // Esquerda
                     novoCentroMenorX = centroMenor.X - delta;
-                    pontoCentroMenor = new Ponto4D(centroMenor.X, novoCentroMenorX);
+                    pontoCentroMenor = new Ponto4D(novoCentroMenorX, centroMenor.Y);
                     break;
                 case 'D':  // Direita
                     novoCentroMenorX = centroMenor.X + delta;
-                    pontoCentroMenor = new Ponto4D(centroMenor.X, novoCentroMenorX);
+                    pontoCentroMenor = new Ponto4D(novoCentroMenorX, centroMenor.Y);
                     break;
             }
 
-            // Calcular distância entre os centros
-            // Ponto4D pontoCentroMenor = new Ponto4D(centroMenor.X, centroMenor.Y);
-            Ponto4D pontoCentroMaior = new Ponto4D(centroMaior.X, centroMaior.Y);
-            double distancia = Matematica.DistanciaQuadrado(pontoCentroMenor, pontoCentroMaior);
+            if (
+                pontoCentroMenor.X > pontoFinalRetangulo2.X &&
+                pontoCentroMenor.X < pontoFinalRetangulo1.X &&
+                pontoCentroMenor.Y > pontoFinalRetangulo2.Y &&
+                pontoCentroMenor.Y < pontoFinalRetangulo1.Y &&
+                foraRetangulo == false
+            ) {
+                MovePontoCentro();
+            } else {
+                // Calcular distância entre os centros
+                Ponto4D pontoCentroMaior = new Ponto4D(centroMaior.X, centroMaior.Y);
+                double distancia = Matematica.DistanciaQuadrado(pontoCentroMenor, pontoCentroMaior);
 
-            // Verifica se o centro do círculo menor está dentro do círculo maior (distância^2 <= raioMaior^2)
-            if (distancia <= raioMaior * raioMaior)
-            {
-                pontosLista.Clear();
-                
-                centroMenor.Y = novoCentroMenorY;
-                centroMenor.X = novoCentroMenorX;
-
-                base.PontosAdicionar(centroMenor);
-                int angulo = 1;
-
-                for (int i = 0; i < 1300; i++) {
-                    Ponto4D pto = Matematica.GerarPtosCirculo(angulo, 0.1);
-                    Ponto4D pontoFinal = new Ponto4D(pto.X + centroMenor.X, pto.Y + centroMenor.Y, 0);
-                    base.PontosAdicionar(pontoFinal);
-                    angulo += 1;
+                // Verifica se o centro do círculo menor está dentro do círculo maior (distância^2 <= raioMaior^2)
+                if (distancia <= raioMaior * raioMaior)
+                {
+                    MovePontoCentro();
                 }
-                this.Atualizar(centroMenor);  // Atualiza a posição do círculo menor
+
+                foraRetangulo = true;
             }
+        }
+
+        private void MovePontoCentro()
+        {
+            pontosLista.Clear();
+            Ponto4D centroMenor = this.GetCentro();
+                
+            centroMenor.Y = this.novoCentroMenorY;
+            centroMenor.X = this.novoCentroMenorX;
+
+            base.PontosAdicionar(centroMenor);
+            int angulo = 1;
+
+            for (int i = 0; i < 1300; i++) {
+                Ponto4D pto = Matematica.GerarPtosCirculo(angulo, 0.1);
+                Ponto4D pontoFinal = new Ponto4D(pto.X + centroMenor.X, pto.Y + centroMenor.Y, 0);
+                base.PontosAdicionar(pontoFinal);
+                angulo += 1;
+            }
+            this.Atualizar(centroMenor);  // Atualiza a posição do círculo menor
         }
 
 #if CG_Debug
