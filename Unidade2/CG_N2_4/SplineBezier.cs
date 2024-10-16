@@ -7,67 +7,126 @@ namespace gcgcg
 {
   internal class SplineBezier : Objeto
   {
+    private int qtdPontos;
+    Ponto4D ponto1;
+    Ponto4D ponto2;
+    Ponto4D ponto3;
+    Ponto4D ponto4;
     public SplineBezier(Objeto _paiRef, ref char _rotulo) : base(_paiRef, ref _rotulo)
     {
-      PontosListaTamanho = 11; // Quantidade inicial de pontos na spline
-      PrimitivaTipo = PrimitiveType.LineStrip; // Desenho da spline
-      Atualizar();
-    }
+      PrimitivaTipo = PrimitiveType.LineStrip;
 
-    public void SplineQtdPto(int inc)
-    {
-      PontosListaTamanho += inc;
-      if (PontosListaTamanho < 2) PontosListaTamanho = 2; // Evitar quantidade negativa ou zero
+      ponto1 = new Ponto4D(-0.5, -0.5);
+      ponto2 = new Ponto4D(-0.5, 0.5);
+      ponto3 = new Ponto4D(0.5, 0.5);
+      ponto4 = new Ponto4D(0.5, -0.5);
+
+      base.PontosAdicionar(ponto1);
+      base.PontosAdicionar(ponto2);
+      base.PontosAdicionar(ponto3);
+      base.PontosAdicionar(ponto4);
+      
+      this.qtdPontos = 10;
+
       Atualizar();
     }
 
     public void Atualizar()
     {
       pontosLista.Clear();
-      for (int i = 0; i < PontosListaTamanho; i++)
-      {
-        // Algoritmo para calcular a spline
-        double t = i / (double)(PontosListaTamanho - 1);
-        Ponto4D pontoSpline = CalcularSpline(t);
-        PontosAdicionar(pontoSpline);
+
+      for (double i = 0; i < this.qtdPontos; i++) {
+        double t = i/(qtdPontos-1);
+        Ponto4D p0 = FuncaoSpline(ponto1, ponto2, t);
+        Ponto4D p1 = FuncaoSpline(ponto2, ponto3, t);
+        Ponto4D p2 = FuncaoSpline(ponto3, ponto4, t);
+        Ponto4D p01 = FuncaoSpline(p0, p1, t);
+        Ponto4D p12 = FuncaoSpline(p1, p2, t);
+        Ponto4D resultado = FuncaoSpline(p01, p12, t);
+
+        base.PontosAdicionar(resultado);
       }
+      
       base.ObjetoAtualizar();
     }
 
-    public void AtualizarSpline(Ponto4D ptoInc, bool proximo)
+    public void MoverDireita(Objeto objetoSelecionado)
     {
-      pontosLista[proximo] = ptoInc;
+      Ponto4D ponto = objetoSelecionado.PontosId(0);
+
+      if (ponto1.X == ponto.X && ponto1.Y == ponto.Y) {
+        ponto1 = new Ponto4D(ponto.X + 0.005, ponto.Y, 0);
+      } else if (ponto2.X == ponto.X && ponto2.Y == ponto.Y) {
+        ponto2 = new Ponto4D(ponto.X + 0.005, ponto.Y, 0);
+      } else if (ponto3.X == ponto.X && ponto3.Y == ponto.Y) {
+        ponto3 = new Ponto4D(ponto.X + 0.005, ponto.Y, 0);
+      } else if (ponto4.X == ponto.X && ponto4.Y == ponto.Y) {
+        ponto4 = new Ponto4D(ponto.X + 0.005, ponto.Y, 0);
+      }
       Atualizar();
     }
 
-    private Ponto4D CalcularSpline(double t)
+    public void MoverEsquerda(Objeto objetoSelecionado)
     {
-      int n = pontosLista.Count - 1; // Grau da curva
-      Ponto4D pontoBezier = new Ponto4D(0, 0, 0);
+      Ponto4D ponto = objetoSelecionado.PontosId(0);
 
-      for (int i = 0; i <= n; i++)
-      {
-          double coefBinomial = Binomial(n, i);
-          double bernstein = coefBinomial * Math.Pow(1 - t, n - i) * Math.Pow(t, i);
-          pontoBezier.X += bernstein * pontosLista[i].X;
-          pontoBezier.Y += bernstein * pontosLista[i].Y * -1;
+      if (ponto1.X == ponto.X && ponto1.Y == ponto.Y) {
+        ponto1 = new Ponto4D(ponto.X - 0.005, ponto.Y, 0);
+      } else if (ponto2.X == ponto.X && ponto2.Y == ponto.Y) {
+        ponto2 = new Ponto4D(ponto.X - 0.005, ponto.Y, 0);
+      } else if (ponto3.X == ponto.X && ponto3.Y == ponto.Y) {
+        ponto3 = new Ponto4D(ponto.X - 0.005, ponto.Y, 0);
+      } else if (ponto4.X == ponto.X && ponto4.Y == ponto.Y) {
+        ponto4 = new Ponto4D(ponto.X - 0.005, ponto.Y, 0);
       }
-
-      return pontoBezier;
+      Atualizar();
     }
 
-    // Função para calcular o coeficiente binomial (n sobre i)
-    private double Binomial(int n, int i)
+    public void MoverCima(Objeto objetoSelecionado)
     {
-      return Fatorial(n) / (Fatorial(i) * Fatorial(n - i));
+      Ponto4D ponto = objetoSelecionado.PontosId(0);
+
+      if (ponto1.X == ponto.X && ponto1.Y == ponto.Y) {
+        ponto1 = new Ponto4D(ponto.X, ponto.Y + 0.005, 0);
+      } else if (ponto2.X == ponto.X && ponto2.Y == ponto.Y) {
+        ponto2 = new Ponto4D(ponto.X, ponto.Y + 0.005, 0);
+      } else if (ponto3.X == ponto.X && ponto3.Y == ponto.Y) {
+        ponto3 = new Ponto4D(ponto.X, ponto.Y + 0.005, 0);
+      } else if (ponto4.X == ponto.X && ponto4.Y == ponto.Y) {
+        ponto4 = new Ponto4D(ponto.X, ponto.Y + 0.005, 0);
+      }
+      Atualizar();
     }
 
-    // Função para calcular o fatorial de um número
-    private double Fatorial(int num)
+    public void MoverBaixo(Objeto objetoSelecionado)
     {
-      if (num == 0 || num == 1)
-        return 1;
-      return num * Fatorial(num - 1);
-    } 
+      Ponto4D ponto = objetoSelecionado.PontosId(0);
+
+      if (ponto1.X == ponto.X && ponto1.Y == ponto.Y) {
+        ponto1 = new Ponto4D(ponto.X, ponto.Y - 0.005, 0);
+      } else if (ponto2.X == ponto.X && ponto2.Y == ponto.Y) {
+        ponto2 = new Ponto4D(ponto.X, ponto.Y - 0.005, 0);
+      } else if (ponto3.X == ponto.X && ponto3.Y == ponto.Y) {
+        ponto3 = new Ponto4D(ponto.X, ponto.Y - 0.005, 0);
+      } else if (ponto4.X == ponto.X && ponto4.Y == ponto.Y) {
+        ponto4 = new Ponto4D(ponto.X, ponto.Y - 0.005, 0);
+      }
+      Atualizar();
+    }
+    
+    private Ponto4D FuncaoSpline(Ponto4D ponto1, Ponto4D ponto2, double t)
+    {
+      double pontoX = ponto1.X + (ponto2.X - ponto1.X) * t;
+      double pontoY = ponto1.Y + (ponto2.Y - ponto1.Y) * t;
+
+      return new Ponto4D(pontoX, pontoY);
+    }
+    
+    public void AlterarQuantidadePontos(int incremento)
+    {
+      qtdPontos += incremento;
+      if (qtdPontos < 2) qtdPontos = 2; // Evitar quantidade negativa ou zero
+      Atualizar();
+    }
   }
 }

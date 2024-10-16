@@ -1,7 +1,11 @@
-﻿﻿/*
- As constantes dos pré-processors estão nos arquivos ".csproj"
- desse projeto e da CG_Biblioteca.
-*/
+﻿﻿#define CG_DEBUG
+#define CG_Gizmo      
+#define CG_OpenGL      
+// #define CG_OpenTK
+// #define CG_DirectX      
+// #define CG_Privado  
+
+//FIXME: as diretivas parecem não funcionar direito. Aqui neste projeto sim, mas quando estão na CG_Biblioteca não funciona.
 
 using CG_Biblioteca;
 using OpenTK.Graphics.OpenGL4;
@@ -21,7 +25,8 @@ namespace gcgcg
     private char rotuloAtual = '?';
     private Dictionary<char, Objeto> grafoLista = [];
     private Objeto objetoSelecionado = null;
-
+    private List<Objeto> objetos = new List<Objeto>();
+    private SplineBezier spline;
 
 #if CG_Gizmo
     private readonly float[] _sruEixos =
@@ -38,6 +43,7 @@ namespace gcgcg
     private Shader _shaderVerde;
     private Shader _shaderAzul;
     private Shader _shaderCiano;
+    private Shader _shaderAmarela;
 
     private bool mouseMovtoPrimeiro = true;
     private Ponto4D mouseMovtoUltimo;
@@ -46,6 +52,40 @@ namespace gcgcg
       : base(gameWindowSettings, nativeWindowSettings)
     {
       mundo ??= new Objeto(null, ref rotuloAtual); //padrão Singleton
+    }
+
+    private void GrafocenaAtualizar()
+    {
+      grafoLista.Clear();
+      grafoLista = mundo.GrafocenaAtualizar(grafoLista);
+    }
+
+    private bool GrafoCenaProximo()
+    {
+      GrafocenaAtualizar();
+      var itGrafo = grafoLista.GetEnumerator();
+      itGrafo.MoveNext();
+      itGrafo.MoveNext();
+      if (objetoSelecionado == null)
+      {
+        objetoSelecionado = itGrafo.Current.Value;
+        return false;
+      }
+      if (objetoSelecionado.Rotulo == '@')
+      {
+        objetoSelecionado = itGrafo.Current.Value;
+        return true;
+      }
+      do
+      {
+        if (itGrafo.Current.Key == objetoSelecionado.Rotulo)
+        {
+          itGrafo.MoveNext();
+          objetoSelecionado = itGrafo.Current.Value;
+          return true;
+        }
+      } while (itGrafo.MoveNext());
+      return false;
     }
 
     protected override void OnLoad()
@@ -57,16 +97,17 @@ namespace gcgcg
       Console.WriteLine("Tamanho interno da janela de desenho: " + ClientSize.X + "x" + ClientSize.Y);
 #endif
 
-      GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      // GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      GL.ClearColor(0.502f, 0.502f, 0.698f, 1.0f);
 
       #region Cores
       _shaderVermelha = new Shader("Shaders/shader.vert", "Shaders/shaderVermelha.frag");
       _shaderVerde = new Shader("Shaders/shader.vert", "Shaders/shaderVerde.frag");
       _shaderAzul = new Shader("Shaders/shader.vert", "Shaders/shaderAzul.frag");
       _shaderCiano = new Shader("Shaders/shader.vert", "Shaders/shaderCiano.frag");
+      _shaderAmarela = new Shader("Shaders/shader.vert", "Shaders/shaderAmarela.frag");
       #endregion
 
-#if CG_Gizmo
       #region Eixos: SRU  
       _vertexBufferObject_sruEixos = GL.GenBuffer();
       GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject_sruEixos);
@@ -76,37 +117,77 @@ namespace gcgcg
       GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
       GL.EnableVertexAttribArray(0);
       #endregion
-#endif
 
       #region Objeto: polígono qualquer  
-      List<Ponto4D> pontosPoligono =
-      [
-        new Ponto4D(0.25, 0.25),
-        new Ponto4D(0.75, 0.25),
-        new Ponto4D(0.75, 0.75),
-        new Ponto4D(0.50, 0.50),
-        new Ponto4D(0.25, 0.75),
-      ];
-      objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosPoligono);
+      // List<Ponto4D> pontosPoligono =
+      // [
+      //   new Ponto4D(0.25, 0.25),
+      //   new Ponto4D(0.75, 0.25),
+      //   new Ponto4D(0.75, 0.75),
+      //   new Ponto4D(0.50, 0.50),
+      //   new Ponto4D(0.25, 0.75),
+      // ];
+      // objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosPoligono);
       #endregion
       #region NÃO USAR: declara um objeto filho ao polígono
-      objetoSelecionado = new Ponto(objetoSelecionado, ref rotuloAtual, new Ponto4D(0.50, 0.75));
+      // objetoSelecionado = new Ponto(objetoSelecionado, ref rotuloAtual, new Ponto4D(0.50, 0.75));
       #endregion
       #region Objeto: retângulo  
-      objetoSelecionado = new Retangulo(mundo, ref rotuloAtual, new Ponto4D(-0.25, 0.25), new Ponto4D(-0.75, 0.75))
-      {
-        PrimitivaTipo = PrimitiveType.LineLoop
-      };
+      // objetoSelecionado = new Retangulo(mundo, ref rotuloAtual, new Ponto4D(-0.25, 0.25), new Ponto4D(-0.75, 0.75))
+      // {
+      //   PrimitivaTipo = PrimitiveType.LineLoop
+      // };
       #endregion
       #region Objeto: segmento de reta  
-      objetoSelecionado = new SegReta(mundo, ref rotuloAtual, new Ponto4D(-0.25, -0.25), new Ponto4D(-0.75, -0.75));
+      // objetoSelecionado = new SegReta(mundo, ref rotuloAtual, new Ponto4D(-0.25, -0.25), new Ponto4D(-0.75, -0.75));
       #endregion
       #region Objeto: ponto  
-      objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(0.25, -0.25))
-      {
-        PrimitivaTipo = PrimitiveType.Points,
-        PrimitivaTamanho = 10
-      };
+      // objetoSelecionado = new Ponto(mundo, ref rotuloAtual, new Ponto4D(0.25, -0.25))
+      // {
+      //   PrimitivaTipo = PrimitiveType.Points,
+      //   PrimitivaTamanho = 10
+      // };
+      #endregion
+
+      #region Objeto: Spline
+      // objetoSelecionado = new SplineBezier(mundo, ref rotuloAtual);
+
+      Ponto4D ponto1 = new Ponto4D(-0.5, -0.5);
+      Ponto4D ponto2 = new Ponto4D(-0.5, 0.5);
+      Ponto4D ponto3 = new Ponto4D(0.5, 0.5);
+      Ponto4D ponto4 = new Ponto4D(0.5, -0.5);
+
+      Ponto pontoSpline1 = new Ponto(mundo, ref rotuloAtual, ponto1);
+      pontoSpline1.PrimitivaTamanho = 10;
+      objetos.Add(pontoSpline1);
+
+      Ponto pontoSpline2 = new Ponto(mundo, ref rotuloAtual, ponto2);
+      pontoSpline2.PrimitivaTamanho = 10;
+      objetos.Add(pontoSpline2);
+
+      Ponto pontoSpline3 = new Ponto(mundo, ref rotuloAtual, ponto3);
+      pontoSpline3.PrimitivaTamanho = 10;
+      objetos.Add(pontoSpline3);
+
+      Ponto pontoSpline4 = new Ponto(mundo, ref rotuloAtual, ponto4);
+      pontoSpline4.PrimitivaTamanho = 10;
+      objetos.Add(pontoSpline4);
+
+      SegReta segReta1 = new SegReta(mundo, ref rotuloAtual, ponto1, ponto2);
+      segReta1.PrimitivaTamanho = 5;
+      segReta1.ShaderObjeto = _shaderCiano;
+
+      SegReta segReta2 = new SegReta(mundo, ref rotuloAtual, ponto2, ponto3);
+      segReta2.PrimitivaTamanho = 5;
+      segReta2.ShaderObjeto = _shaderCiano;
+
+      SegReta segReta3 = new SegReta(mundo, ref rotuloAtual, ponto3, ponto4);
+      segReta3.PrimitivaTamanho = 5;
+      segReta3.ShaderObjeto = _shaderCiano;
+
+      spline = new SplineBezier(mundo, ref rotuloAtual);
+      spline.PrimitivaTamanho = 5;
+      spline.ShaderObjeto = _shaderAmarela;
       #endregion
 
 #if CG_Privado
@@ -142,7 +223,6 @@ namespace gcgcg
       GL.Clear(ClearBufferMask.ColorBufferBit);
 
       mundo.Desenhar(new Transformacao4D(), objetoSelecionado);
-
 #if CG_Gizmo
       Gizmo_Sru3D();
 #endif
@@ -159,30 +239,61 @@ namespace gcgcg
         Close();
 
       if (estadoTeclado.IsKeyPressed(Keys.Space))
-        objetoSelecionado = Grafocena.GrafoCenaProximo(mundo, objetoSelecionado, grafoLista);
+        GrafoCenaProximo();
 
-      if (estadoTeclado.IsKeyPressed(Keys.G))
-        Grafocena.GrafoCenaImprimir(mundo, grafoLista);
-      if (estadoTeclado.IsKeyPressed(Keys.P))
+      if (estadoTeclado.IsKeyPressed(Keys.P) && objetoSelecionado != null)
       {
-        if (objetoSelecionado != null)
-          Console.WriteLine(objetoSelecionado);
-        else
-          Console.WriteLine("objetoSelecionado: MUNDO \n__________________________________\n");
+        Console.WriteLine(objetoSelecionado);
       }
 
       if (estadoTeclado.IsKeyPressed(Keys.C) && objetoSelecionado != null)
       {
-        objetoSelecionado.ShaderObjeto = _shaderCiano;
+        if (objetoSelecionado.PontosListaTamanho > 0 && objetos.Contains(objetoSelecionado))
+        {
+          spline.MoverCima(objetoSelecionado);
+          objetoSelecionado.PontosAlterar(new Ponto4D(objetoSelecionado.PontosId(0).X, objetoSelecionado.PontosId(0).Y + 0.005, 0), 0);
+          objetoSelecionado.ObjetoAtualizar();
+        }
       }
 
-      if (estadoTeclado.IsKeyPressed(Keys.Right) && objetoSelecionado != null)
+      if (estadoTeclado.IsKeyPressed(Keys.D) && objetoSelecionado != null)
       {
-        if (objetoSelecionado.PontosListaTamanho > 0)
+        if (objetoSelecionado.PontosListaTamanho > 0 && objetos.Contains(objetoSelecionado))
         {
+          spline.MoverDireita(objetoSelecionado);
           objetoSelecionado.PontosAlterar(new Ponto4D(objetoSelecionado.PontosId(0).X + 0.005, objetoSelecionado.PontosId(0).Y, 0), 0);
           objetoSelecionado.ObjetoAtualizar();
         }
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.E) && objetoSelecionado != null)
+      {
+        if (objetoSelecionado.PontosListaTamanho > 0 && objetos.Contains(objetoSelecionado))
+        {
+          spline.MoverEsquerda(objetoSelecionado);
+          objetoSelecionado.PontosAlterar(new Ponto4D(objetoSelecionado.PontosId(0).X - 0.005, objetoSelecionado.PontosId(0).Y, 0), 0);
+          objetoSelecionado.ObjetoAtualizar();
+        }
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.B) && objetoSelecionado != null)
+      {
+        if (objetoSelecionado.PontosListaTamanho > 0 && objetos.Contains(objetoSelecionado))
+        {
+          spline.MoverBaixo(objetoSelecionado);
+          objetoSelecionado.PontosAlterar(new Ponto4D(objetoSelecionado.PontosId(0).X, objetoSelecionado.PontosId(0).Y - 0.005, 0), 0);
+          objetoSelecionado.ObjetoAtualizar();
+        }
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.KeyPadAdd))
+      {
+        spline.AlterarQuantidadePontos(1);
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.Comma))
+      {
+        spline.AlterarQuantidadePontos(-1);
       }
 
       if (estadoTeclado.IsKeyPressed(Keys.R) && objetoSelecionado != null)
@@ -198,7 +309,7 @@ namespace gcgcg
       Ponto4D mousePonto = new(MousePosition.X, MousePosition.Y);
       Ponto4D sruPonto = Utilitario.NDC_TelaSRU(janelaLargura, janelaAltura, mousePonto);
 
-      if (estadoTeclado.IsKeyPressed(Keys.LeftShift))
+      if (estadoTeclado.IsKeyDown(Keys.LeftShift))
       {
         if (mouseMovtoPrimeiro)
         {
@@ -242,10 +353,8 @@ namespace gcgcg
       GL.BindVertexArray(0);
       GL.UseProgram(0);
 
-#if CG_Gizmo
       GL.DeleteBuffer(_vertexBufferObject_sruEixos);
       GL.DeleteVertexArray(_vertexArrayObject_sruEixos);
-#endif
 
       GL.DeleteProgram(_shaderVermelha.Handle);
       GL.DeleteProgram(_shaderVerde.Handle);
@@ -255,10 +364,10 @@ namespace gcgcg
       base.OnUnload();
     }
 
+#if CG_Gizmo
     private void Gizmo_Sru3D()
     {
-#if CG_Gizmo
-#if CG_OpenGL
+#if CG_OpenGL && !CG_DirectX
       var transform = Matrix4.Identity;
       GL.BindVertexArray(_vertexArrayObject_sruEixos);
       // EixoX
@@ -273,9 +382,13 @@ namespace gcgcg
       _shaderAzul.SetMatrix4("transform", transform);
       _shaderAzul.Use();
       GL.DrawArrays(PrimitiveType.Lines, 4, 2);
-#endif
+#elif CG_DirectX && !CG_OpenGL
+      Console.WriteLine(" .. Coloque aqui o seu código em DirectX");
+#elif (CG_DirectX && CG_OpenGL) || (!CG_DirectX && !CG_OpenGL)
+      Console.WriteLine(" .. ERRO de Render - escolha OpenGL ou DirectX !!");
 #endif
     }
+#endif
 
   }
 }

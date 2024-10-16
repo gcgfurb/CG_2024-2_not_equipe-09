@@ -99,7 +99,7 @@ namespace gcgcg
 
     public void Desenhar(Transformacao4D matrizGrafo, Objeto objetoSelecionado)
     {
-#if CG_OpenGL
+#if CG_OpenGL && !CG_DirectX
       GL.PointSize(primitivaTamanho);
 
       GL.BindVertexArray(_vertexArrayObject);
@@ -112,20 +112,24 @@ namespace gcgcg
         _shaderObjeto.SetMatrix4("transform", matrizGrafo.ObterDadosOpenTK());
         _shaderObjeto.Use();
         GL.DrawArrays(primitivaTipo, 0, pontosLista.Count);
+#elif CG_DirectX && !CG_OpenGL
+      Console.WriteLine(" .. Coloque aqui o seu código em DirectX");
+#elif (CG_DirectX && CG_OpenGL) || (!CG_DirectX && !CG_OpenGL)
+      Console.WriteLine(" .. ERRO de Render - escolha OpenGL ou DirectX !!");
+#endif
+#if CG_Gizmo
         if (objetoSelecionado == this)
         {
           matrizGlobal = ObjetoMatrizGlobal(matriz);
           bBox.Atualizar(matrizGlobal, pontosLista);
-#if CG_Gizmo && CG_BBox
           bBox.Desenhar();
-#endif
         }
+#endif
       }
       for (var i = 0; i < objetosLista.Count; i++)
       {
         objetosLista[i].Desenhar(matrizGrafo, objetoSelecionado);
       }
-#endif
     }
 
     #region Objeto: CRUD
