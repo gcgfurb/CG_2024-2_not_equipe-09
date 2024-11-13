@@ -1,0 +1,12 @@
+@startuml SplineBezier
+class SplineBezier {
+    + SplineBezier(_paiRef:Objeto, _rotulo:char)
+    + Atualizar() : void
+    + MoverDireita(objetoSelecionado:Objeto) : void
+    + MoverEsquerda(objetoSelecionado:Objeto) : void
+    + MoverCima(objetoSelecionado:Objeto) : void
+    + MoverBaixo(objetoSelecionado:Objeto) : void
+    + AlterarQuantidadePontos(incremento:int) : void
+}
+Objeto <|-- SplineBezier
+@enduml

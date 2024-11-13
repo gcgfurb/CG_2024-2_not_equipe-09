@@ -1,8 +1,7 @@
-@startuml
+@startuml Ponto
 class Ponto {
-    + Ponto(paiRef:Objeto, _rotulo:char)
-    + Ponto(paiRef:Objeto, _rotulo:char, pto:Ponto4D)
-    + Atualizar() : void
+    + Ponto(_paiRef:Objeto, _rotulo:char)
+    + Ponto(_paiRef:Objeto, _rotulo:char, pto:Ponto4D)
     + <<override>> ToString() : string
 }
 Objeto <|-- Ponto

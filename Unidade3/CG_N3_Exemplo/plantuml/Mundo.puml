@@ -1,4 +1,4 @@
-@startuml
+@startuml Mundo
 class Mundo {
     + Mundo(gameWindowSettings:GameWindowSettings, nativeWindowSettings:NativeWindowSettings)
 }

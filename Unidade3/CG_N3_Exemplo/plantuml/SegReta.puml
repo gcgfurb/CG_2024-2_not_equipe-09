@@ -1,7 +1,7 @@
-@startuml
+@startuml SegReta
 class SegReta {
-    + SegReta(paiRef:Objeto, _rotulo:char)
-    + SegReta(paiRef:Objeto, _rotulo:char, ptoIni:Ponto4D, ptoFim:Ponto4D)
+    + SegReta(_paiRef:Objeto, _rotulo:char)
+    + SegReta(_paiRef:Objeto, _rotulo:char, ptoIni:Ponto4D, ptoFim:Ponto4D)
     + <<override>> ToString() : string
 }
 Objeto <|-- SegReta
