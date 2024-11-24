@@ -181,6 +181,8 @@ namespace gcgcg
       // Utilize a tecla D para remover o polígono selecionado.  
       if (estadoTeclado.IsKeyPressed(Keys.D) && objetoSelecionado != null)
       {
+        objetoSelecionado.ObjetoRemover();
+        objetoSelecionado = null;
         Console.WriteLine("## 3. Estrutura de dados: polígono - Tecla D");
       }
 
