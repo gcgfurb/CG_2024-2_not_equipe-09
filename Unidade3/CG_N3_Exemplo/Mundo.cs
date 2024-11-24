@@ -83,36 +83,36 @@ namespace gcgcg
 #endif
 
       #region Objeto: polígono qualquer, só para testes e ajudar no desenvolvimento  
-      List<Ponto4D> pontosPoligonoBandeiraA =
-      [
-        new Ponto4D(0.25, 0.25),
-        new Ponto4D(0.75, 0.25),
-        new Ponto4D(0.75, 0.75),
-        new Ponto4D(0.50, 0.50),
-        new Ponto4D(0.25, 0.75),
-      ];
-      objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosPoligonoBandeiraA);
-      #endregion
+      // List<Ponto4D> pontosPoligonoBandeiraA =
+      // [
+      //   new Ponto4D(0.25, 0.25),
+      //   new Ponto4D(0.75, 0.25),
+      //   new Ponto4D(0.75, 0.75),
+      //   new Ponto4D(0.50, 0.50),
+      //   new Ponto4D(0.25, 0.75),
+      // ];
+      // objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosPoligonoBandeiraA);
+      // #endregion
 
-      List<Ponto4D> teste =
-      [
-        new Ponto4D(0.0, 0.0),
-        new Ponto4D(0.2, 0.0),
-        new Ponto4D(0.2, 0.2),
-        new Ponto4D(0.0, 0.2),
-      ];
-      objetoSelecionado = new Poligono(objetoSelecionado, ref rotuloAtual, teste);
+      // List<Ponto4D> teste =
+      // [
+      //   new Ponto4D(0.0, 0.0),
+      //   new Ponto4D(0.2, 0.0),
+      //   new Ponto4D(0.2, 0.2),
+      //   new Ponto4D(0.0, 0.2),
+      // ];
+      // objetoSelecionado = new Poligono(objetoSelecionado, ref rotuloAtual, teste);
 
-      #region Objeto: polígono qualquer, só para testes e ajudar no desenvolvimento  
-      List<Ponto4D> pontosPoligonoBandeiraB =
-      [
-        new Ponto4D(-0.25, -0.25),
-        new Ponto4D(-0.75, -0.25),
-        new Ponto4D(-0.75, -0.75),
-        new Ponto4D(-0.50, -0.50),
-        new Ponto4D(-0.25, -0.75),
-      ];
-      objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosPoligonoBandeiraB);
+      // #region Objeto: polígono qualquer, só para testes e ajudar no desenvolvimento  
+      // List<Ponto4D> pontosPoligonoBandeiraB =
+      // [
+      //   new Ponto4D(-0.25, -0.25),
+      //   new Ponto4D(-0.75, -0.25),
+      //   new Ponto4D(-0.75, -0.75),
+      //   new Ponto4D(-0.50, -0.50),
+      //   new Ponto4D(-0.25, -0.75),
+      // ];
+      // objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosPoligonoBandeiraB);
       #endregion
 
       // objetoSelecionado = null;
@@ -174,6 +174,7 @@ namespace gcgcg
       if (estadoTeclado.IsKeyPressed(Keys.Enter))
       {
         Console.WriteLine("## 2. Estrutura de dados: polígono - Enter");
+        objetoSelecionado = null;
       }
 
       // ## 3. Estrutura de dados: polígono
@@ -253,6 +254,21 @@ namespace gcgcg
       // Utilize o mouse para clicar na tela com botão direito e poder desenhar um novo polígono.  
       if (MouseState.IsButtonPressed(MouseButton.Right))
       {
+        // Converte as coordenadas do clique para o sistema de coordenadas da janela
+        float x = (float)(2.0 * MousePosition.X / Size.X - 1.0);
+        float y = (float)(1.0 - 2.0 * MousePosition.Y / Size.Y);
+
+        Ponto4D ponto = new Ponto4D(x, y, 0);
+
+        if (objetoSelecionado == null) {
+          List<Ponto4D> pontosTemporarios = new List<Ponto4D>(); // Armazena os pontos do polígono em construção
+          pontosTemporarios.Add(ponto);
+          objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosTemporarios);
+        } else {
+          objetoSelecionado.PontosAdicionar(ponto);
+        }
+
+        // objetoSelecionado.PontosAdicionar(ponto);
         Console.WriteLine("MouseState.IsButtonDown(MouseButton.Right)");
       }
       if (MouseState.IsButtonReleased(MouseButton.Right))
