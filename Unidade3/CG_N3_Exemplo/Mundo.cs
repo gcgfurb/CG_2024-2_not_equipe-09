@@ -280,13 +280,13 @@ namespace gcgcg
         if (poligonoNovo) {
           List<Ponto4D> pontosTemporarios = new List<Ponto4D>(); // Armazena os pontos do polígono em construção
           pontosTemporarios.Add(ponto);
+          pontosTemporarios.Add(ponto);
           objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosTemporarios);
           poligonoNovo = false;
         } else {
           objetoSelecionado.PontosAdicionar(ponto);
         }
 
-        // objetoSelecionado.PontosAdicionar(ponto);
         Console.WriteLine("MouseState.IsButtonDown(MouseButton.Right)");
       }
       if (MouseState.IsButtonReleased(MouseButton.Right))
