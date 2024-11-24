@@ -208,6 +208,11 @@ namespace gcgcg
       if (estadoTeclado.IsKeyPressed(Keys.E) && objetoSelecionado != null)
       {
         Console.WriteLine("## 5. Estrutura de dados: vértices remover - Tecla E");
+
+        float x = (float)(2.0 * MousePosition.X / Size.X - 1.0);
+        float y = (float)(1.0 - 2.0 * MousePosition.Y / Size.Y);
+
+        int indicePontoMaisPerto = objetoSelecionado.PontoMaisPerto(new Ponto4D(x, y), true);
       }
 
       // ## 7. Interação: desenho
