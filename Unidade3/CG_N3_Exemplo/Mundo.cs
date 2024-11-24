@@ -22,6 +22,7 @@ namespace gcgcg
     private Dictionary<char, Objeto> grafoLista = [];
     private Objeto objetoSelecionado = null;
     // private Objeto objetoNovo = null;
+    private bool poligonoNovo = true;
     private Transformacao4D matrizGrafo = new();
 
 #if CG_Gizmo
@@ -174,7 +175,7 @@ namespace gcgcg
       if (estadoTeclado.IsKeyPressed(Keys.Enter))
       {
         Console.WriteLine("## 2. Estrutura de dados: polígono - Enter");
-        objetoSelecionado = null;
+        poligonoNovo = true;
       }
 
       // ## 3. Estrutura de dados: polígono
@@ -191,6 +192,15 @@ namespace gcgcg
       if (estadoTeclado.IsKeyDown(Keys.V) && objetoSelecionado != null)
       {
         Console.WriteLine("## 4. Estrutura de dados: vértices mover - Tecla V");
+
+        float x = (float)(2.0 * MousePosition.X / Size.X - 1.0);
+        float y = (float)(1.0 - 2.0 * MousePosition.Y / Size.Y);
+
+        int indicePontoMaisPerto = objetoSelecionado.PontoMaisPerto(new Ponto4D(x, y), false);
+        Ponto4D pontoMaisPerto = objetoSelecionado.PontosId(indicePontoMaisPerto);
+
+        pontoMaisPerto = new Ponto4D(x, y);
+        objetoSelecionado.ObjetoAtualizar();
       }
 
       // ## 5. Estrutura de dados: vértices remover
@@ -262,10 +272,11 @@ namespace gcgcg
 
         Ponto4D ponto = new Ponto4D(x, y, 0);
 
-        if (objetoSelecionado == null) {
+        if (poligonoNovo) {
           List<Ponto4D> pontosTemporarios = new List<Ponto4D>(); // Armazena os pontos do polígono em construção
           pontosTemporarios.Add(ponto);
           objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosTemporarios);
+          poligonoNovo = false;
         } else {
           objetoSelecionado.PontosAdicionar(ponto);
         }
