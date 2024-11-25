@@ -250,14 +250,30 @@ namespace gcgcg
 
       // ## 10. Transformações Geométricas: translação
       // Utilizando as teclas das setas direcionais (cima/baixo,direita,esquerda) movimente o polígono selecionado.  
-      if (estadoTeclado.IsKeyPressed(Keys.Left) && objetoSelecionado != null)
+      if (estadoTeclado.IsKeyPressed(Keys.Left) && objetoSelecionado != null) {
         Console.WriteLine("## 10. Transformações Geométricas: translação - esquerda");
-      if (estadoTeclado.IsKeyPressed(Keys.Right) && objetoSelecionado != null)
+
+        objetoSelecionado.MatrizTranslacaoXYZ(-0.1, 0, 0);
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.Right) && objetoSelecionado != null) {
         Console.WriteLine("## 10. Transformações Geométricas: translação - direita");
-      if (estadoTeclado.IsKeyPressed(Keys.Up) && objetoSelecionado != null)
+
+        objetoSelecionado.MatrizTranslacaoXYZ(0.1, 0, 0);
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.Up) && objetoSelecionado != null) {
         Console.WriteLine("## 10. Transformações Geométricas: translação - cima");
-      if (estadoTeclado.IsKeyPressed(Keys.Down) && objetoSelecionado != null)
+
+        objetoSelecionado.MatrizTranslacaoXYZ(0, 0.1, 0);
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.Down) && objetoSelecionado != null){
         Console.WriteLine("## 10. Transformações Geométricas: translação - baixo");
+
+        objetoSelecionado.MatrizTranslacaoXYZ(0, -0.1, 0);
+      }
+
       // ## 11. Transformações Geométricas: escala
       // Utilizando as teclas PageUp/PageDown redimensione o polígono selecionado em relação ao SRU.  [TODO: testar]
       if (estadoTeclado.IsKeyPressed(Keys.PageUp) && objetoSelecionado != null)
@@ -341,7 +357,7 @@ namespace gcgcg
           Console.WriteLine("Vector2 mousePosition (Objeto): " + MousePosition);
 
         }
-        
+
         bool poligonoSelecionado = mundo.ScanLine(sruPonto, ref objetoSelecionado);
 
         if (poligonoSelecionado == false) {
