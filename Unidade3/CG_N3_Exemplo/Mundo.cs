@@ -276,15 +276,31 @@ namespace gcgcg
 
       // ## 11. Transformações Geométricas: escala
       // Utilizando as teclas PageUp/PageDown redimensione o polígono selecionado em relação ao SRU.  [TODO: testar]
-      if (estadoTeclado.IsKeyPressed(Keys.PageUp) && objetoSelecionado != null)
+      if (estadoTeclado.IsKeyPressed(Keys.PageUp) && objetoSelecionado != null) {
         Console.WriteLine("## 11. Transformações Geométricas: escala - PageUp");
-      if (estadoTeclado.IsKeyPressed(Keys.PageDown) && objetoSelecionado != null)
+
+        objetoSelecionado.MatrizEscalaXYZ(0.5, 0.5, 0);
+      }
+      
+      if (estadoTeclado.IsKeyPressed(Keys.PageDown) && objetoSelecionado != null) {
         Console.WriteLine("## 11. Transformações Geométricas: escala - PageDown");
+
+        objetoSelecionado.MatrizEscalaXYZ(2, 2, 0);
+      }
+
       // Utilizando as teclas Home/End redimensione o polígono selecionado em relação ao centro da sua BBox.  [TODO: testar]
-      if (estadoTeclado.IsKeyPressed(Keys.Home) && objetoSelecionado != null)
+      if (estadoTeclado.IsKeyPressed(Keys.Home) && objetoSelecionado != null) {
         Console.WriteLine("## 11. Transformações Geométricas: escala - Home");
-      if (estadoTeclado.IsKeyPressed(Keys.End) && objetoSelecionado != null)
+        
+        objetoSelecionado.MatrizEscalaXYZBBox(0.5, 0.5, 0);
+      }
+
+      if (estadoTeclado.IsKeyPressed(Keys.End) && objetoSelecionado != null) {
         Console.WriteLine("## 11. Transformações Geométricas: escala - End");
+
+        objetoSelecionado.MatrizEscalaXYZBBox(2, 2, 0);
+      }
+      
       // ## 12. Transformações Geométricas: rotação
       // Utilizando as teclas numéricas 1 e 2 gire o polígono selecionado em relação ao SRU.
       if (estadoTeclado.IsKeyPressed(Keys.D1) && objetoSelecionado != null)
