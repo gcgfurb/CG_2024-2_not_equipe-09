@@ -339,6 +339,13 @@ namespace gcgcg
         {
           sruPonto = objetoSelecionado.MatrizGlobalInversa(sruPonto);
           Console.WriteLine("Vector2 mousePosition (Objeto): " + MousePosition);
+
+        }
+        
+        bool poligonoSelecionado = mundo.ScanLine(sruPonto, ref objetoSelecionado);
+
+        if (poligonoSelecionado == false) {
+          objetoSelecionado = null;
         }
       }
 
