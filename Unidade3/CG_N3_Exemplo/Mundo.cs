@@ -212,7 +212,7 @@ namespace gcgcg
         float x = (float)(2.0 * MousePosition.X / Size.X - 1.0);
         float y = (float)(1.0 - 2.0 * MousePosition.Y / Size.Y);
 
-        int indicePontoMaisPerto = objetoSelecionado.PontoMaisPerto(new Ponto4D(x, y), true);
+        objetoSelecionado.PontoMaisPerto(new Ponto4D(x, y), true);
       }
 
       // ## 7. Interação: desenho
@@ -220,6 +220,12 @@ namespace gcgcg
       if (estadoTeclado.IsKeyPressed(Keys.P) && objetoSelecionado != null)
       {
         Console.WriteLine("## 7. Interação: desenho - Tecla P");
+
+        if (objetoSelecionado.PrimitivaTipo == PrimitiveType.LineStrip) {
+          objetoSelecionado.PrimitivaTipo = PrimitiveType.LineLoop;
+        } else {
+          objetoSelecionado.PrimitivaTipo = PrimitiveType.LineStrip;
+        }
       }
 
       // ## 8. Interação: cores
