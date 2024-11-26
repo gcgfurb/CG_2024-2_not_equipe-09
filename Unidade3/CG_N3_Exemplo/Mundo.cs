@@ -176,6 +176,7 @@ namespace gcgcg
       {
         Console.WriteLine("## 2. Estrutura de dados: polígono - Enter");
         poligonoNovo = true;
+        objetoSelecionado = null;
       }
 
       // ## 3. Estrutura de dados: polígono
@@ -345,7 +346,16 @@ namespace gcgcg
           List<Ponto4D> pontosTemporarios = new List<Ponto4D>(); // Armazena os pontos do polígono em construção
           pontosTemporarios.Add(ponto);
           pontosTemporarios.Add(ponto);
-          objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosTemporarios);
+
+          if (objetoSelecionado == null) {
+            objetoSelecionado = new Poligono(mundo, ref rotuloAtual, pontosTemporarios);
+          } else {
+            Objeto pai = mundo.GrafocenaBusca(objetoSelecionado.Rotulo);
+            objetoSelecionado = new Poligono(pai, ref rotuloAtual, pontosTemporarios);
+
+            pai.FilhoAdicionar(objetoSelecionado);
+          }
+
           poligonoNovo = false;
         } else {
           objetoSelecionado.PontosAdicionar(ponto);
