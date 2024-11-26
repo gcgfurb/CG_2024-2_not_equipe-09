@@ -353,7 +353,7 @@ namespace gcgcg
             Objeto pai = mundo.GrafocenaBusca(objetoSelecionado.Rotulo);
             objetoSelecionado = new Poligono(pai, ref rotuloAtual, pontosTemporarios);
 
-            pai.FilhoAdicionar(objetoSelecionado);
+            pai.FilhoAdicionar(objetoSelecionado); 
           }
 
           poligonoNovo = false;
